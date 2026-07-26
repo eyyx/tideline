@@ -35,9 +35,22 @@ def test_us_state_code_disambiguates_shared_city_names():
     assert parse_country("Melbourne, Australia") == "AU"
 
 
-def test_multi_location_resolves_to_first_segment():
-    assert parse_country("Sydney, Australia; New York, NY") == "AU"
+def test_multi_location_resolves_by_target_priority_not_position():
+    """A posting open in Singapore is a Singapore posting wherever Singapore appears."""
+    assert parse_country("Kuala Lumpur, Malaysia; Singapore") == "SG"
+    assert parse_country("Seoul, South Korea; Singapore; Tokyo, Japan") == "SG"
     assert parse_country("Singapore | London") == "SG"
+    assert parse_country("Sydney, Australia; New York, NY") == "AU"  # SG absent, AU wins
+    assert parse_country("London, UK; Remote-Friendly, United States; San Francisco, CA") == "US"
+
+
+def test_slash_is_not_a_location_separator():
+    """'Headquarters/Sunnyvale Office' is one location, not two."""
+    assert parse_country("Headquarters/Sunnyvale Office") == "US"
+
+
+def test_non_target_multi_location_stays_other():
+    assert parse_country("London, UK; Dublin, Ireland") == "OTHER"
 
 
 @pytest.mark.parametrize(

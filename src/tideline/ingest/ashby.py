@@ -7,7 +7,11 @@ from typing import Any
 import httpx
 
 from tideline.ingest.base import CompanySpec, IngestError, get_json, to_utc_iso
-from tideline.ingest.locations import is_remote, parse_country
+from tideline.ingest.locations import (
+    parse_country,
+    parse_subregion,
+    parse_workplace_type,
+)
 from tideline.ingest.textutils import html_to_text
 from tideline.models import NormalizedJob
 
@@ -59,6 +63,8 @@ def parse_jobs(payload: Any, company: CompanySpec) -> list[NormalizedJob]:
             continue  # Unlisted postings are not public openings.
 
         location_raw = item.get("location")
+        country = parse_country(location_raw)
+        workplace = parse_workplace_type(location_raw, item.get("workplaceType"))
         salary_min, salary_max, currency = _extract_compensation(item)
         jobs.append(
             NormalizedJob(
@@ -67,12 +73,12 @@ def parse_jobs(payload: Any, company: CompanySpec) -> list[NormalizedJob]:
                 company=company.name,
                 title=item["title"],
                 location_raw=location_raw,
-                country=parse_country(location_raw),
-                is_remote=(
-                    bool(item.get("isRemote"))
-                    or item.get("workplaceType") == "Remote"
-                    or is_remote(location_raw)
-                ),
+                country=country,
+                subregion=parse_subregion(location_raw, country),
+                workplace_type=workplace,
+                # Ashby sets isRemote=true on Hybrid postings, so it cannot define
+                # "remote"; derive the boolean from the typed field instead.
+                is_remote=workplace == "remote",
                 url=item.get("jobUrl"),
                 # Ashby ships its own plain-text rendering; only convert the HTML when
                 # that is missing.

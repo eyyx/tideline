@@ -7,7 +7,12 @@ from typing import Any
 import httpx
 
 from tideline.ingest.base import CompanySpec, IngestError, get_json, to_utc_iso
-from tideline.ingest.locations import country_from_iso, is_remote, parse_country
+from tideline.ingest.locations import (
+    country_from_iso,
+    parse_country,
+    parse_subregion,
+    parse_workplace_type,
+)
 from tideline.ingest.textutils import html_to_text
 from tideline.models import NormalizedJob
 
@@ -28,6 +33,7 @@ def parse_jobs(payload: Any, company: CompanySpec) -> list[NormalizedJob]:
         # Lever publishes an ISO country code per posting — the employer's own answer,
         # so prefer it over parsing text like "North America" or "Remote".
         country = country_from_iso(item.get("country")) or parse_country(location_raw)
+        workplace = parse_workplace_type(location_raw, item.get("workplaceType"))
         jobs.append(
             NormalizedJob(
                 source="lever",
@@ -36,7 +42,9 @@ def parse_jobs(payload: Any, company: CompanySpec) -> list[NormalizedJob]:
                 title=item["text"],
                 location_raw=location_raw,
                 country=country,
-                is_remote=item.get("workplaceType") == "remote" or is_remote(location_raw),
+                subregion=parse_subregion(location_raw, country),
+                workplace_type=workplace,
+                is_remote=workplace == "remote",
                 url=item.get("hostedUrl"),
                 description=description,
                 posted_at=to_utc_iso(item.get("createdAt")),

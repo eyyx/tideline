@@ -7,7 +7,11 @@ from typing import Any
 import httpx
 
 from tideline.ingest.base import CompanySpec, IngestError, get_json, to_utc_iso
-from tideline.ingest.locations import is_remote, parse_country
+from tideline.ingest.locations import (
+    parse_country,
+    parse_subregion,
+    parse_workplace_type,
+)
 from tideline.ingest.textutils import html_to_text
 from tideline.models import NormalizedJob
 
@@ -22,6 +26,10 @@ def parse_jobs(payload: Any, company: CompanySpec) -> list[NormalizedJob]:
     jobs: list[NormalizedJob] = []
     for item in payload["jobs"]:
         location_raw = (item.get("location") or {}).get("name")
+        country = parse_country(location_raw)
+        # Greenhouse exposes no workplace field, so this is text inference only and
+        # will often land on "unknown". That is the honest answer.
+        workplace = parse_workplace_type(location_raw)
         jobs.append(
             NormalizedJob(
                 source="greenhouse",
@@ -29,8 +37,10 @@ def parse_jobs(payload: Any, company: CompanySpec) -> list[NormalizedJob]:
                 company=company.name,
                 title=item["title"],
                 location_raw=location_raw,
-                country=parse_country(location_raw),
-                is_remote=is_remote(location_raw),
+                country=country,
+                subregion=parse_subregion(location_raw, country),
+                workplace_type=workplace,
+                is_remote=workplace == "remote",
                 url=item.get("absolute_url"),
                 description=html_to_text(item.get("content")),
                 # first_published is a genuine publish date and is populated on every

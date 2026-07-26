@@ -8,7 +8,15 @@ from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-Country = Literal["SG", "US", "AU", "OTHER"]
+#: Target regions: Singapore (home market), the US, Australia, and the Netherlands.
+#: NZ was briefly a target and was dropped — anything outside these four is OTHER.
+Country = Literal["SG", "US", "AU", "NL", "OTHER"]
+
+#: Remote / hybrid / onsite is a three-way distinction, not a boolean. Collapsing hybrid
+#: into "remote" is actively wrong for relocation decisions: a hybrid role still requires
+#: living in the city. Ashby reports `isRemote: true` on hybrid postings, so its boolean
+#: cannot be trusted — the typed field is the source of truth where a source provides one.
+WorkplaceType = Literal["remote", "hybrid", "onsite", "unknown"]
 Source = Literal["greenhouse", "lever", "ashby", "adzuna"]
 Seniority = Literal["intern", "junior", "mid", "senior", "staff_plus", "manager", "unknown"]
 VisaSponsorship = Literal["yes", "no", "unknown"]
@@ -35,6 +43,10 @@ class NormalizedJob(BaseModel):
     title: str
     location_raw: str | None = None
     country: Country = "OTHER"
+    #: Sub-national region, currently the 2-letter state for US postings. Needed because
+    #: "the US" is not a market — CA, NY and MA are.
+    subregion: str | None = None
+    workplace_type: WorkplaceType = "unknown"
     is_remote: bool = False
     url: str | None = None
     description: str | None = None

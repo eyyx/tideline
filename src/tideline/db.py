@@ -31,6 +31,8 @@ CREATE TABLE IF NOT EXISTS jobs (
   title          TEXT NOT NULL,
   location_raw   TEXT,
   country        TEXT,
+  subregion      TEXT,
+  workplace_type TEXT DEFAULT 'unknown',
   is_remote      INTEGER DEFAULT 0,
   url            TEXT,
   description    TEXT,
@@ -49,6 +51,7 @@ CREATE TABLE IF NOT EXISTS jobs (
 CREATE INDEX IF NOT EXISTS idx_jobs_dedupe    ON jobs(dedupe_key);
 CREATE INDEX IF NOT EXISTS idx_jobs_first_seen ON jobs(first_seen);
 CREATE INDEX IF NOT EXISTS idx_jobs_country   ON jobs(country, is_active);
+CREATE INDEX IF NOT EXISTS idx_jobs_subregion ON jobs(country, subregion);
 CREATE INDEX IF NOT EXISTS idx_jobs_source    ON jobs(source, is_active);
 
 CREATE TABLE IF NOT EXISTS classifications (
@@ -135,7 +138,8 @@ def upsert_job(conn: sqlite3.Connection, job: NormalizedJob, now: str) -> Upsert
             """
             UPDATE jobs SET
               last_seen = ?, is_active = 1, closed_at = NULL,
-              title = ?, location_raw = ?, country = ?, is_remote = ?,
+              title = ?, location_raw = ?, country = ?, subregion = ?,
+              workplace_type = ?, is_remote = ?,
               url = ?, description = ?, posted_at = ?, dedupe_key = ?,
               salary_min = COALESCE(?, salary_min),
               salary_max = COALESCE(?, salary_max),
@@ -147,6 +151,8 @@ def upsert_job(conn: sqlite3.Connection, job: NormalizedJob, now: str) -> Upsert
                 job.title,
                 job.location_raw,
                 job.country,
+                job.subregion,
+                job.workplace_type,
                 int(job.is_remote),
                 job.url,
                 job.description,
@@ -177,10 +183,10 @@ def upsert_job(conn: sqlite3.Connection, job: NormalizedJob, now: str) -> Upsert
     conn.execute(
         """
         INSERT INTO jobs (
-          source, source_job_id, company, title, location_raw, country, is_remote,
-          url, description, posted_at, first_seen, last_seen, is_active, dedupe_key,
-          salary_min, salary_max, salary_currency
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?, ?)
+          source, source_job_id, company, title, location_raw, country, subregion,
+          workplace_type, is_remote, url, description, posted_at, first_seen,
+          last_seen, is_active, dedupe_key, salary_min, salary_max, salary_currency
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?, ?)
         """,
         (
             job.source,
@@ -189,6 +195,8 @@ def upsert_job(conn: sqlite3.Connection, job: NormalizedJob, now: str) -> Upsert
             job.title,
             job.location_raw,
             job.country,
+            job.subregion,
+            job.workplace_type,
             int(job.is_remote),
             job.url,
             job.description,
