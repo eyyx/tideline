@@ -118,9 +118,38 @@ def connect(path: Path | str = DEFAULT_DB_PATH) -> sqlite3.Connection:
     return conn
 
 
+#: Columns added after the first release. `CREATE TABLE IF NOT EXISTS` is a no-op on an
+#: existing table, so a committed database never gains new columns on its own — and the
+#: pipeline reads its own committed DB on every CI run. Without this, the run after any
+#: schema change fails with "no such column" in CI while passing locally.
+#: Additive only: SQLite cannot drop or retype a column, and the DB is version-controlled.
+_MIGRATIONS: tuple[tuple[str, str, str], ...] = (
+    ("jobs", "subregion", "TEXT"),
+    ("jobs", "workplace_type", "TEXT DEFAULT 'unknown'"),
+)
+
+
+def _migrate(conn: sqlite3.Connection) -> list[str]:
+    """Bring an existing database up to the current schema. Returns what it added."""
+    applied: list[str] = []
+    for table, column, ddl in _MIGRATIONS:
+        existing = {row[1] for row in conn.execute(f"PRAGMA table_info({table})")}
+        if not existing:
+            continue  # Table not created yet; SCHEMA will define it complete.
+        if column not in existing:
+            conn.execute(f"ALTER TABLE {table} ADD COLUMN {column} {ddl}")
+            applied.append(f"{table}.{column}")
+    return applied
+
+
 def init_schema(conn: sqlite3.Connection) -> None:
+    applied = _migrate(conn)
     conn.executescript(SCHEMA)
     conn.commit()
+    if applied:
+        import logging
+
+        logging.getLogger("tideline").info("migrated: added %s", ", ".join(applied))
 
 
 def upsert_job(conn: sqlite3.Connection, job: NormalizedJob, now: str) -> UpsertResult:
