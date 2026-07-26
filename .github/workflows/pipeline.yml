@@ -1,0 +1,94 @@
+name: pipeline
+
+on:
+  schedule:
+    # Twice daily, off-peak UTC (PLAN §11).
+    - cron: "0 1,13 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+# Never let two runs write data/jobs.db at once. Queued rather than cancelled: a
+# skipped run is a hole in the time series that can never be backfilled.
+concurrency:
+  group: pipeline
+  cancel-in-progress: false
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Install dependencies
+        run: uv sync --frozen
+
+      - name: Run pipeline
+        run: uv run python -m tideline.run_pipeline
+
+      - name: Summarise
+        if: always()
+        run: |
+          uv run python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import sqlite3
+          c = sqlite3.connect("data/jobs.db")
+          total = c.execute("SELECT COUNT(*) FROM jobs").fetchone()[0]
+          active = c.execute("SELECT COUNT(*) FROM jobs WHERE is_active=1").fetchone()[0]
+          print(f"### Ingest\n\n- **{total}** rows ({active} active)\n")
+          print("| country | jobs |\n|---|---|")
+          for row in c.execute(
+              "SELECT country, COUNT(*) FROM jobs WHERE is_active=1"
+              " GROUP BY country ORDER BY 2 DESC"
+          ):
+              print(f"| {row[0]} | {row[1]} |")
+          failed = c.execute(
+              "SELECT source, error FROM ingest_runs WHERE ok=0"
+              " AND run_at = (SELECT MAX(run_at) FROM ingest_runs)"
+          ).fetchall()
+          if failed:
+              print(f"\n### Failed boards ({len(failed)})\n")
+              for source, error in failed:
+                  print(f"- `{source}` — {error}")
+          PY
+
+      - name: Commit updated database
+        run: |
+          set -euo pipefail
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          if git diff --quiet -- data/jobs.db; then
+            echo "No database changes to commit."
+            exit 0
+          fi
+
+          git add data/jobs.db
+          git commit -m "chore(data): daily update"
+
+          # Retry against concurrent pushes. jobs.db is binary, so a rebase cannot
+          # merge it: we keep our version, which already contains every row present
+          # at checkout plus this run's. The concurrency group above makes this
+          # near-unreachable in practice.
+          for attempt in 1 2 3; do
+            if git push; then
+              echo "Pushed on attempt $attempt."
+              exit 0
+            fi
+            echo "Push rejected; rebasing (attempt $attempt)."
+            git pull --rebase --no-edit || {
+              git checkout --ours data/jobs.db
+              git add data/jobs.db
+              git -c core.editor=true rebase --continue
+            }
+          done
+
+          echo "::error::Could not push the updated database after 3 attempts."
+          exit 1

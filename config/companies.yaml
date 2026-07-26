@@ -1,0 +1,375 @@
+# Seed company list for ATS ingest (PLAN §6.5).
+#
+# Every token below was validated by request: the board returned HTTP 200 with a
+# non-empty job list. Adding or removing a company only ever touches this file.
+#
+#   ats:   greenhouse | lever | ashby
+#   token: board_token (Greenhouse) / site (Lever) / org (Ashby)
+
+# --- AI labs, AI infra, and agent companies ---
+- name: OpenAI
+  ats: ashby
+  token: openai
+  note: ai-lab
+- name: Anthropic
+  ats: greenhouse
+  token: anthropic
+  note: ai-lab
+- name: Harvey
+  ats: ashby
+  token: harvey
+  note: ai-vertical
+- name: Nebius
+  ats: greenhouse
+  token: nebius
+  note: ai-hardware
+- name: CoreWeave
+  ats: greenhouse
+  token: coreweave
+  note: ai-hardware
+- name: ElevenLabs
+  ats: ashby
+  token: elevenlabs
+  note: ai-lab
+- name: Scale AI
+  ats: greenhouse
+  token: scaleai
+  note: ai-infra
+- name: Sierra AI
+  ats: ashby
+  token: sierra
+  note: ai-agents
+- name: Cohere
+  ats: ashby
+  token: cohere
+  note: ai-lab
+- name: Anysphere (Cursor)
+  ats: ashby
+  token: cursor
+  note: ai-coding
+- name: Decagon
+  ats: ashby
+  token: decagon
+  note: ai-agents
+- name: Cerebras
+  ats: ashby
+  token: cerebras
+  note: ai-hardware
+- name: Glean
+  ats: greenhouse
+  token: gleanwork
+  note: ai-search
+- name: Cresta
+  ats: greenhouse
+  token: cresta
+  note: ai-agents
+- name: Perplexity AI
+  ats: ashby
+  token: perplexity
+  note: ai-lab
+- name: LangChain
+  ats: ashby
+  token: langchain
+  note: ai-agents
+- name: Synthesia
+  ats: ashby
+  token: synthesia
+  note: ai-vertical
+- name: Mercor
+  ats: ashby
+  token: mercor
+  note: ai-vertical
+- name: Baseten
+  ats: ashby
+  token: baseten
+  note: ai-infra
+- name: Together AI
+  ats: greenhouse
+  token: togetherai
+  note: ai-infra
+- name: Writer
+  ats: ashby
+  token: writer
+  note: ai-vertical
+- name: Luma AI
+  ats: ashby
+  token: lumaai
+  note: ai-lab
+- name: Fireworks AI
+  ats: greenhouse
+  token: fireworksai
+  note: ai-infra
+- name: Lambda Labs
+  ats: ashby
+  token: lambda
+  note: ai-hardware
+- name: Abridge
+  ats: ashby
+  token: abridge
+  note: ai-vertical
+- name: Modal Labs
+  ats: ashby
+  token: modal
+  note: ai-infra
+- name: Vapi
+  ats: ashby
+  token: vapi
+  note: ai-agents
+- name: Observe.AI
+  ats: greenhouse
+  token: observeai
+  note: ai-agents
+- name: Poolside
+  ats: ashby
+  token: poolside
+  note: ai-coding
+- name: LlamaIndex
+  ats: ashby
+  token: llamaindex
+  note: ai-agents
+- name: Pinecone
+  ats: ashby
+  token: pinecone
+  note: ai-infra
+- name: Runway
+  ats: ashby
+  token: runway
+  note: ai-lab
+- name: Weaviate
+  ats: ashby
+  token: weaviate
+  note: ai-infra
+- name: Imbue
+  ats: greenhouse
+  token: imbue
+  note: ai-agents
+- name: Chroma
+  ats: ashby
+  token: trychroma
+  note: ai-infra
+
+# --- Forward-deployed / solutions-heavy ---
+- name: Palantir
+  ats: lever
+  token: palantir
+  note: fde
+- name: Applied Intuition
+  ats: ashby
+  token: applied
+  note: fde
+
+# --- Singapore and Southeast Asia ---
+- name: GovTech Singapore
+  ats: greenhouse
+  token: govtech
+  note: sg-gov
+- name: Ninja Van
+  ats: lever
+  token: ninjavan
+  note: sg
+- name: Thunes
+  ats: greenhouse
+  token: thunes
+  note: sg-fintech
+- name: Nium
+  ats: lever
+  token: nium
+  note: sg-fintech
+- name: PatSnap
+  ats: lever
+  token: patsnap
+  note: sg
+- name: Xendit
+  ats: greenhouse
+  token: xendit
+  note: sea-fintech
+- name: Trust Bank
+  ats: greenhouse
+  token: trustbank
+  note: sg-fintech
+- name: Hatch
+  ats: ashby
+  token: hatch
+  note: sg
+
+# --- Australia ---
+- name: Airwallex
+  ats: ashby
+  token: airwallex
+  note: au-fintech
+- name: Eucalyptus
+  ats: greenhouse
+  token: eucalyptus
+  note: au-health
+- name: Mable
+  ats: lever
+  token: mable
+  note: au-health
+- name: Culture Amp
+  ats: greenhouse
+  token: cultureamp
+  note: au-hr
+- name: Kaluza
+  ats: greenhouse
+  token: kaluza
+  note: au-energy
+- name: Deputy
+  ats: lever
+  token: deputy
+  note: au-saas
+- name: Prospa
+  ats: greenhouse
+  token: prospa
+  note: au-fintech
+- name: Airtasker
+  ats: ashby
+  token: airtasker
+  note: au
+- name: Pexa
+  ats: lever
+  token: pexa
+  note: au
+- name: SafetyCulture
+  ats: ashby
+  token: safetyculture
+  note: au
+- name: Immutable
+  ats: lever
+  token: immutable
+  note: au-web3
+- name: Octopus Deploy
+  ats: greenhouse
+  token: octopusdeploy
+  note: au-devtools
+- name: Athena Home Loans
+  ats: greenhouse
+  token: athena
+  note: au-fintech
+
+# --- US mid-to-large tech (industry baseline) ---
+- name: Databricks
+  ats: greenhouse
+  token: databricks
+  note: data-ai
+- name: Stripe
+  ats: greenhouse
+  token: stripe
+  note: fintech
+- name: DoorDash
+  ats: greenhouse
+  token: doordashusa
+  note: marketplace
+- name: Datadog
+  ats: greenhouse
+  token: datadog
+  note: infra
+- name: Snowflake
+  ats: ashby
+  token: snowflake
+  note: data
+- name: Samsara
+  ats: greenhouse
+  token: samsara
+  note: iot
+- name: Verkada
+  ats: greenhouse
+  token: verkada
+  note: hardware
+- name: Cloudflare
+  ats: greenhouse
+  token: cloudflare
+  note: infra
+- name: Airbnb
+  ats: greenhouse
+  token: airbnb
+  note: marketplace
+- name: Reddit
+  ats: greenhouse
+  token: reddit
+  note: consumer
+- name: Twilio
+  ats: greenhouse
+  token: twilio
+  note: infra
+- name: Figma
+  ats: greenhouse
+  token: figma
+  note: saas
+- name: Affirm
+  ats: greenhouse
+  token: affirm
+  note: fintech
+- name: Coinbase
+  ats: greenhouse
+  token: coinbase
+  note: fintech
+- name: Notion
+  ats: ashby
+  token: notion
+  note: saas
+- name: Instacart
+  ats: greenhouse
+  token: instacart
+  note: marketplace
+- name: Robinhood
+  ats: greenhouse
+  token: robinhood
+  note: fintech
+- name: Ramp
+  ats: ashby
+  token: ramp
+  note: fintech
+- name: Plaid
+  ats: ashby
+  token: plaid
+  note: fintech
+- name: Vercel
+  ats: greenhouse
+  token: vercel
+  note: infra
+- name: Gusto
+  ats: greenhouse
+  token: gusto
+  note: hr-tech
+- name: Benchling
+  ats: ashby
+  token: benchling
+  note: biotech
+- name: Discord
+  ats: greenhouse
+  token: discord
+  note: consumer
+- name: Amplitude
+  ats: greenhouse
+  token: amplitude
+  note: analytics
+- name: Airtable
+  ats: greenhouse
+  token: airtable
+  note: saas
+- name: Sardine
+  ats: ashby
+  token: sardine
+  note: fintech
+- name: Linear
+  ats: ashby
+  token: linear
+  note: saas
+
+# --- Not reachable via Greenhouse/Lever/Ashby ---
+#
+# These were probed across all three platforms with multiple token spellings and
+# have no public board on any of them; they run Workday or in-house career portals.
+# They are significant gaps in SG/AU coverage — Adzuna (PLAN §6.4) is the intended
+# backfill for exactly this. Do not spend more time guessing tokens for them.
+#
+# - name: Grab          # SG, Workday
+# - name: Sea Group     # SG, in-house portal (also Shopee, Garena, SeaMoney)
+# - name: Canva         # AU, in-house portal
+# - name: Atlassian     # AU, Workday
+# - name: Carousell     # SG, in-house
+# - name: Hugging Face  # Workable
+# - name: Mistral AI    # in-house
+# - name: Rippling      # in-house
+# - name: Retool        # in-house
+# - name: dbt Labs      # in-house
